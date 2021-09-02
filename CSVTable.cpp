@@ -4,7 +4,7 @@
 #include <filesystem>
 
 
-CSVTable::CSVTable(const string &path){
+CSVTable::CSVTable(const string &path) {
     checkPath(path);
     in.open(path);
     readCSV(path);
@@ -26,7 +26,7 @@ void CSVTable::readCSV(const string &path) {
     parseHeader(line);
 
     while (getline(in, line, '\n')) {
-        data.emplace_back(getNextParsedLine(line));
+        data.emplace_back(parseNextRow(line));
     }
 }
 
@@ -34,37 +34,99 @@ void CSVTable::parseHeader(const string &header) {
     stringstream ss(header);
     string cell;
 
-    // skip empty cell and check if it exists
-    getline(ss, cell, ',');
-    checkEmptyCell(cell);
+    getline(ss, cell, ','); // skipping empty cell
+    deleteSpaces(cell);
+    checkFirstEmptyCell(cell);
 
     for (int i = 0; getline(ss, cell, ','); i++) {
-        checkRepeatedCell(cell);
+        deleteSpaces(cell);
+        checkRepeatedColName(cell);
+        checkEmptyColumnName(cell);
         col_to_index[cell] = i;
     }
 }
 
-void CSVTable::checkEmptyCell(const string &cell) {
+void CSVTable::deleteSpaces(string &str) {
+    str.erase(remove_if(str.begin(), str.end(), ::isspace), str.end());
+}
+
+void CSVTable::checkFirstEmptyCell(const string &cell) {
     if (!cell.empty()) {
-        throw invalid_argument("Incorrect table format");
+        throw invalid_argument("Incorrect table format, first cell must be empty");
     }
 }
 
-void CSVTable::checkRepeatedCell(const string &cell) {
+void CSVTable::checkRepeatedColName(const string &cell) {
     if (col_to_index.count(cell)) {
         throw invalid_argument("Table has repeated cells in header");
     }
 }
 
-vector<string> CSVTable::getNextParsedLine(const string &line) {
-    vector<string> res;
+void CSVTable::checkEmptyColumnName(const string &cell) {
+    if (cell.empty()) {
+        throw invalid_argument("Incorrect table format, has empty column name");
+    }
+}
+
+vector<string> CSVTable::parseNextRow(const string &line) {
+    vector<string> row;
     stringstream ss(line);
 
-    for (string cell; getline(ss, cell, ',');) {
-        res.emplace_back(cell);
+    getRowNum(ss);
+
+    string cell;
+    while (getline(ss, cell, ',')) {
+        deleteSpaces(cell);
+        checkEmptyCell(cell);
+        row.emplace_back(cell);
     }
 
-    return res;
+    checkRowSize(row.size());
+
+    return row;
+}
+
+void CSVTable::getRowNum(stringstream &ss) {
+    string cell;
+
+    static int index = 0;
+    getline(ss, cell, ',');
+    deleteSpaces(cell);
+    checkEmptyRowNum(cell);
+    checkPositiveNum(cell);
+    checkRepeatedRowName(cell);
+
+    row_to_index[cell] = index++;
+}
+
+void CSVTable::checkPositiveNum(const string &cell) {
+    if (stoi(cell) < 1) {
+        throw invalid_argument("Incorrect table format, row number isn't positive");
+    }
+}
+
+void CSVTable::checkEmptyRowNum(const string &cell) {
+    if (cell.empty()) {
+        throw invalid_argument("Incorrect table format, has empty row number");
+    }
+}
+
+void CSVTable::checkRepeatedRowName(const string &cell) {
+    if (row_to_index.count(cell)) {
+        throw invalid_argument("Incorrect table format, table has repeated rows names");
+    }
+}
+
+void CSVTable::checkEmptyCell(const string &cell) {
+    if (cell.empty()) {
+        throw invalid_argument("Incorrect table format, has empty cell");
+    }
+}
+
+void CSVTable::checkRowSize(size_t row_size) {
+    if (row_size != col_to_index.size()) {
+        throw invalid_argument("Incorrect table format, wrong row size");
+    }
 }
 
 vector<vector<string>> CSVTable::getData() {

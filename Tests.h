@@ -72,21 +72,84 @@ void TestCSVTableHeader() {
     {
         try {
             CSVTable table("../Tests/header3.csv");
-            FAIL("'Incorrect table format'");
+            FAIL("'Incorrect table format, first cell must be empty'");
         }
         catch (const invalid_argument &ex) {
-            ASSERT(strcmp(ex.what(), "Incorrect table format") == 0);
+            ASSERT(strcmp(ex.what(), "Incorrect table format, first cell must be empty") == 0);
+        }
+    }
+
+    {
+        try {
+            CSVTable table("../Tests/header4.csv");
+            FAIL("'Incorrect table format, has empty column name'");
+        }
+        catch (const invalid_argument &ex) {
+            ASSERT(strcmp(ex.what(), "Incorrect table format, has empty column name") == 0);
         }
     }
 }
 
 void TestSimpleTable() {
     {
-        vector<vector<string>> expected = {{"1", "0",  "-1"},
-                                           {"2", "6",  "0"},
-                                           {"0", "19", "5"}};
+        vector<vector<string>> expected = {{"1",   "0",  "-1"},
+                                           {"2",   "6",  "0"},
+                                           {"0",   "19", "5"},
+                                           {"-15", "3",  "99"}};
         CSVTable table("../Tests/simple.csv");
         ASSERT_EQUAL(table.getData(), expected);
+    }
+}
+
+void TestRows() {
+    {
+        try {
+            CSVTable table("../Tests/row1.csv");
+            FAIL("'Incorrect table format, has empty row number'");
+        }
+        catch (const invalid_argument &ex) {
+            ASSERT(strcmp(ex.what(), "Incorrect table format, has empty row number") == 0);
+        }
+    }
+
+    {
+        try {
+            CSVTable table("../Tests/row2.csv");
+            FAIL("'Incorrect table format, row number isn't positive'");
+        }
+        catch (const invalid_argument &ex) {
+            ASSERT(strcmp(ex.what(), "Incorrect table format, row number isn't positive") == 0);
+        }
+    }
+
+    {
+        try {
+            CSVTable table("../Tests/row3.csv");
+            FAIL("'Incorrect table format, table has repeated rows names'");
+        }
+        catch (const invalid_argument &ex) {
+            ASSERT(strcmp(ex.what(), "Incorrect table format, table has repeated rows names") == 0);
+        }
+    }
+
+    {
+        try {
+            CSVTable table("../Tests/row4.csv");
+            FAIL("'Incorrect table format, has empty cell'");
+        }
+        catch (const invalid_argument &ex) {
+            ASSERT(strcmp(ex.what(), "Incorrect table format, has empty cell") == 0);
+        }
+    }
+
+    {
+        try {
+            CSVTable table("../Tests/row5.csv");
+            FAIL("'Incorrect table format, wrong row size'");
+        }
+        catch (const invalid_argument &ex) {
+            ASSERT(strcmp(ex.what(), "Incorrect table format, wrong row size") == 0);
+        }
     }
 }
 

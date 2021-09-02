@@ -12,7 +12,7 @@ class CSVTable {
 private:
     ifstream in;
     unordered_map<string, int> col_to_index;
-    unordered_map<int, int> row_to_index;
+    unordered_map<string, int> row_to_index;
     vector<vector<string>> data;
 
 public:
@@ -22,12 +22,20 @@ public:
 
 private:
     static void checkPath(const string &path);
-    void checkRepeatedCell(const string &cell);
-    void checkEmptyCell(const string &cell);
-    void parseHeader(const string &header);
-    vector<string> getNextParsedLine(const string &line);
+    static void checkFirstEmptyCell(const string &cell);
+    static void checkEmptyColumnName(const string &cell);
+    static void checkEmptyRowNum(const string &cell);
+    static void checkPositiveNum(const string &cell);
+    static void checkEmptyCell(const string &cell);
+    void checkRepeatedColName(const string &cell);
+    void checkRepeatedRowName(const string &cell);
+    void checkRowSize(size_t row_size);
 
     void readCSV(const string &path);
+    void parseHeader(const string &header);
+    vector<string> parseNextRow(const string &line);
+    void getRowNum(stringstream &ss);
+    static void deleteSpaces(string &str);
 };
 
 

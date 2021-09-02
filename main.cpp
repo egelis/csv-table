@@ -16,6 +16,7 @@ int main(int argc, char *argv[]) {
         RUN_TEST(tr, TestCSVTableGetPath);
         RUN_TEST(tr, TestCSVTableHeader);
         RUN_TEST(tr, TestSimpleTable);
+        RUN_TEST(tr, TestRows);
     }
 
     try {
@@ -26,7 +27,7 @@ int main(int argc, char *argv[]) {
         auto res = table.getData();
         for (auto &row: res) {
             for (auto &col: row) {
-                cout << col << ' ';
+                cout << "'" << col << "'" << ' ';
             }
             cout << endl;
         }
