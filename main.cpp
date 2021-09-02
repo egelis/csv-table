@@ -10,19 +10,30 @@ using namespace std;
 
 
 int main(int argc, char *argv[]) {
-    TestRunner tr;
-    RUN_TEST(tr, TestParsePath);
+    {
+        TestRunner tr;
+        RUN_TEST(tr, TestParsePath);
+        RUN_TEST(tr, TestCSVTableGetPath);
+        RUN_TEST(tr, TestCSVTableHeader);
+        RUN_TEST(tr, TestSimpleTable);
+    }
 
-    string path = parsePath(argc, argv);
+    try {
+        string path = parsePath(argc, argv);
 
-    CSVTable table(path);
-    auto res = table.getData();
+        CSVTable table(path);
 
-    for (auto &row: res) {
-        for (auto &col: row) {
-            cout << col << ' ';
+        auto res = table.getData();
+        for (auto &row: res) {
+            for (auto &col: row) {
+                cout << col << ' ';
+            }
+            cout << endl;
         }
-        cout << endl;
+    }
+    catch (const invalid_argument &ex) {
+        cerr << ex.what() << endl;
+        return 1;
     }
 
     return 0;
