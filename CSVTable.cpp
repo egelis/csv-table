@@ -40,14 +40,19 @@ void CSVTable::parseHeader(const string &header) {
 
     for (int i = 0; getline(ss, cell, ','); i++) {
         deleteSpaces(cell);
-        checkRepeatedColName(cell);
-        checkEmptyColumnName(cell);
+        checkHeaderCell(cell);
         col_to_index[cell] = i;
     }
 }
 
 void CSVTable::deleteSpaces(string &str) {
     str.erase(remove_if(str.begin(), str.end(), ::isspace), str.end());
+}
+
+void CSVTable::checkHeaderCell(const string &cell) {
+    checkEmptyColumnName(cell);
+    checkRepeatedColName(cell);
+    checkNumInColName(cell);
 }
 
 void CSVTable::checkFirstEmptyCell(const string &cell) {
@@ -59,6 +64,12 @@ void CSVTable::checkFirstEmptyCell(const string &cell) {
 void CSVTable::checkRepeatedColName(const string &cell) {
     if (col_to_index.count(cell)) {
         throw invalid_argument("Table has repeated cells in header");
+    }
+}
+
+void CSVTable::checkNumInColName(const string &cell) {
+    if (std::any_of(cell.begin(), cell.end(), ::isdigit)) {
+        throw invalid_argument("Incorrect table format, there can be no numbers in the column name");
     }
 }
 
@@ -92,22 +103,33 @@ void CSVTable::getRowNum(stringstream &ss) {
     static int index = 0;
     getline(ss, cell, ',');
     deleteSpaces(cell);
-    checkEmptyRowNum(cell);
-    checkPositiveNum(cell);
-    checkRepeatedRowName(cell);
+    checkRowNumCell(cell);
 
     row_to_index[cell] = index++;
 }
 
-void CSVTable::checkPositiveNum(const string &cell) {
-    if (stoi(cell) < 1) {
-        throw invalid_argument("Incorrect table format, row number isn't positive");
-    }
+void CSVTable::checkRowNumCell(const string &cell) {
+    checkEmptyRowNum(cell);
+    checkLetterInRowName(cell);
+    checkPositiveNum(cell);
+    checkRepeatedRowName(cell);
 }
 
 void CSVTable::checkEmptyRowNum(const string &cell) {
     if (cell.empty()) {
         throw invalid_argument("Incorrect table format, has empty row number");
+    }
+}
+
+void CSVTable::checkLetterInRowName(const string &cell) {
+    if (std::any_of(cell.begin(), cell.end(), ::isalpha)) {
+        throw invalid_argument("Incorrect table format, there can be no letters in the row name");
+    }
+}
+
+void CSVTable::checkPositiveNum(const string &cell) {
+    if (stoi(cell) < 1) {
+        throw invalid_argument("Incorrect table format, row number isn't positive");
     }
 }
 

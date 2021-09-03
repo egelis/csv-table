@@ -17,6 +17,7 @@ int main(int argc, char *argv[]) {
         RUN_TEST(tr, TestCSVTableHeader);
         RUN_TEST(tr, TestSimpleTable);
         RUN_TEST(tr, TestRows);
+        cerr << endl;
     }
 
     try {

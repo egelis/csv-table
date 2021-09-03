@@ -88,6 +88,16 @@ void TestCSVTableHeader() {
             ASSERT(strcmp(ex.what(), "Incorrect table format, has empty column name") == 0);
         }
     }
+
+    {
+        try {
+            CSVTable table("../Tests/header5.csv");
+            FAIL("'Incorrect table format, there can be no numbers in the column name'");
+        }
+        catch (const invalid_argument &ex) {
+            ASSERT(strcmp(ex.what(), "Incorrect table format, there can be no numbers in the column name") == 0);
+        }
+    }
 }
 
 void TestSimpleTable() {
@@ -149,6 +159,16 @@ void TestRows() {
         }
         catch (const invalid_argument &ex) {
             ASSERT(strcmp(ex.what(), "Incorrect table format, wrong row size") == 0);
+        }
+    }
+
+    {
+        try {
+            CSVTable table("../Tests/row6.csv");
+            FAIL("'Incorrect table format, there can be no letters in the row name'");
+        }
+        catch (const invalid_argument &ex) {
+            ASSERT(strcmp(ex.what(), "Incorrect table format, there can be no letters in the row name") == 0);
         }
     }
 }

@@ -27,15 +27,19 @@ private:
     static void checkEmptyRowNum(const string &cell);
     static void checkPositiveNum(const string &cell);
     static void checkEmptyCell(const string &cell);
+    static void checkNumInColName(const string &cell);
+    static void checkLetterInRowName(const string &cell);
+    static void deleteSpaces(string &str);
     void checkRepeatedColName(const string &cell);
     void checkRepeatedRowName(const string &cell);
     void checkRowSize(size_t row_size);
+    void checkHeaderCell(const string &cell);
+    void checkRowNumCell(const string &cell);
 
     void readCSV(const string &path);
     void parseHeader(const string &header);
     vector<string> parseNextRow(const string &line);
     void getRowNum(stringstream &ss);
-    static void deleteSpaces(string &str);
 };
 
 
