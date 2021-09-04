@@ -11,4 +11,6 @@ void deleteSpaces(std::string &str);
 
 bool isInteger(const std::string &str);
 
+void checkRef(const std::string &ref);
+
 #endif //TESTTASK_UTILITIES_H

@@ -9,7 +9,6 @@
 
 using namespace std;
 
-
 int main(int argc, char *argv[]) {
     {
         TestRunner tr;
@@ -43,6 +42,10 @@ int main(int argc, char *argv[]) {
         cerr << ex.what() << endl;
         return 1;
     }
+
+    /*parseRef("Cell30");
+    parseRef("30Cell");
+    parseRef("Ce30ll");*/
 
     return 0;
 }

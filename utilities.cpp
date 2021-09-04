@@ -39,3 +39,18 @@ bool isInteger(const string &str) {
     }
     return false;
 }
+
+void checkRef(const std::string &ref) {
+    size_t pos;
+    for (pos = 0; pos < ref.size(); ++pos) {
+        if (isdigit(ref[pos]))
+            break;
+    }
+
+    for (;pos < ref.size(); ++pos) {
+        if (!isdigit(ref[pos])) {
+            cout << ref << endl;
+            throw invalid_argument("Invalid reference to the cell, 1");
+        }
+    }
+}

@@ -38,13 +38,15 @@ private:
 
     void readCSV(const string &path);
     void parseHeader(const string &header);
-    vector<string> parseNextRow(const string &line);
-    void getRowNum(stringstream &ss);
+    vector<string> parseNextRow(const string &line, int index);
+    void getRowNum(stringstream &ss, int index);
 
     void evaluateCell(size_t row, size_t col);
     int evaluateExpr(const string &cell, std::set<string> &cell_stack);
 
     tuple<string, char, string> parseExpr(const string &cell);
+
+    int parseRef(const string &srt);
 };
 
 

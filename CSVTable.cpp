@@ -19,8 +19,8 @@ void CSVTable::readCSV(const string &path) {
     getline(in, line);
     parseHeader(line);
 
-    while (getline(in, line, '\n')) {
-        table.emplace_back(parseNextRow(line));
+    for (int index = 0; getline(in, line, '\n'); ++index) {
+        table.emplace_back(parseNextRow(line, index));
     }
 }
 
@@ -35,10 +35,10 @@ void CSVTable::parseHeader(const string &header) {
         throw invalid_argument("Incorrect table format, first cell must be empty");
     }
 
-    for (int i = 0; getline(ss, cell, ','); i++) {
+    for (int index = 0; getline(ss, cell, ','); index++) {
         deleteSpaces(cell);
         checkHeaderCell(cell);
-        col_to_index[cell] = i;
+        col_to_index[cell] = index;
     }
 }
 
@@ -54,11 +54,11 @@ void CSVTable::checkHeaderCell(const string &cell) {
     }
 }
 
-vector<string> CSVTable::parseNextRow(const string &line) {
+vector<string> CSVTable::parseNextRow(const string &line, int index) {
     vector<string> row;
     stringstream ss(line);
 
-    getRowNum(ss);
+    getRowNum(ss, index);
 
     string cell;
     while (getline(ss, cell, ',')) {
@@ -76,10 +76,9 @@ vector<string> CSVTable::parseNextRow(const string &line) {
     return row;
 }
 
-void CSVTable::getRowNum(stringstream &ss) {
+void CSVTable::getRowNum(stringstream &ss, int index) {
     string cell;
 
-    static int index = 0;
     getline(ss, cell, ',');
     deleteSpaces(cell);
     checkRowNumCell(cell);
@@ -156,18 +155,54 @@ int CSVTable::evaluateExpr(const string &cell, set<string> &cell_stack) {
     }
 
     auto[l_operand, operation, r_operand] = parseExpr(cell);
-    // TODO:: проверять операнды на числа, если они не числа, то пытаться спарсить ссылку
+
+    auto left = isInteger(l_operand) ? stoi(l_operand) : parseRef(l_operand);
+    auto right = isInteger(r_operand) ? stoi(r_operand) : parseRef(r_operand);
+
+    switch (operation) {
+        case '+':
+            return left + right;
+        case '-':
+            return left - right;
+        case '*':
+            return left * right;
+        case '/':
+            if (right == 0) {
+                throw std::invalid_argument("Division by 0");
+            }
+            return left / right;
+        default:
+            throw invalid_argument("Invalid operator in expression");
+    }
+
+    // visited = true;
+    // evaluated_table +
+}
+
+int CSVTable::parseRef(const string &ref) {
+    checkRef(ref);
+
+    size_t pos = ref.find_first_of("123456789");
+    string col = ref.substr(0, pos);
+    string row = ref.substr(pos);
+
+    if (!col_to_index.count(col) || !row_to_index.count(row)) {
+        throw invalid_argument("Invalid reference to the cell, 2");
+    }
+
+    set<string> empty_cell_stack;
+    return evaluateExpr(table[row_to_index[row]][col_to_index[col]], empty_cell_stack);
 }
 
 tuple<string, char, string>
 CSVTable::parseExpr(const string &cell) {
     if (cell[0] != '=') {
-        throw invalid_argument("Invalid cell format, can't meet '=' in cell");
+        throw invalid_argument("Invalid cell format, '=' expected in cell");
     }
 
     auto pos = cell.find_first_of("+-*/");
     if (pos == std::string::npos) {
-        throw invalid_argument("Invalid cell format, can't find operation in cell");
+        throw invalid_argument("Invalid cell format, can't find operation in expression");
     }
     char operation = cell[pos];
 
@@ -177,36 +212,3 @@ CSVTable::parseExpr(const string &cell) {
 
     return make_tuple(left, operation, right);
 }
-
-/*
-bool isExpression(const std::string &str) {
-    if (!str.empty()) {
-        if (str[0] != '=') {
-            return false;
-        }
-
-        for (int i = 0; i < str.size(); ++i) {
-
-        }
-
-        return true;
-    }
-    return false;
-}
-*/
-
-/*
-switch (operation) {
-            case '+':
-                return evaluateExpr(left, cell_stack) + evaluateExpr(right, cell_stack);
-            case '-':
-                return evaluateExpr(left, cell_stack) - evaluateExpr(right, cell_stack);
-            case '/':
-                if (right == "0") {
-                    throw std::logic_error("Can't divide by 0");
-                }
-                return evaluateExpr(left, cell_stack) / evaluateExpr(right, cell_stack);
-            case '*':
-                return evaluateExpr(left, cell_stack) * evaluateExpr(right, cell_stack);
-        }
-*/
