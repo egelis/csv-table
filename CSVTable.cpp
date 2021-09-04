@@ -2,11 +2,15 @@
 
 #include <iostream>
 #include <sstream>
+#include <set>
 
 CSVTable::CSVTable(const string &path) {
     checkPath(path);
     in.open(path);
     readCSV(path);
+
+    cols_size = col_to_index.size();
+    rows_size = row_to_index.size();
 }
 
 void CSVTable::readCSV(const string &path) {
@@ -16,7 +20,7 @@ void CSVTable::readCSV(const string &path) {
     parseHeader(line);
 
     while (getline(in, line, '\n')) {
-        data.emplace_back(parseNextRow(line));
+        table.emplace_back(parseNextRow(line));
     }
 }
 
@@ -99,9 +103,110 @@ void CSVTable::checkRowNumCell(const string &cell) {
 }
 
 vector<vector<string>> CSVTable::getData() {
-    return data;
+    return table;
 }
+
+vector<int> CSVTable::getEvaluated() {
+    return evaluated_table;
+}
+
+void CSVTable::printEvaluated() {
+    for (size_t row = 0; row < rows_size; row++) {
+        for (size_t col = 0; col < cols_size; col++) {
+            cout << evaluated_table[cols_size * row + col] << ' ';
+        }
+        cout << endl;
+    }
+}
+
+/*
+ * Считываем ячейку:
+ * - Если ячейка - число, то проверяем 'целое ли оно'
+ * - Если это выражение, то вызываем evaluateCell(cell), где проверяем на 'соответствие виду =Arg1 OP Arg2',
+ * 'если аргументы являются числами, то они целые', 'если есть ссылки, то они валидные'
+ */
 
 void CSVTable::evaluateTable() {
+    visited.resize(cols_size * rows_size, false);
+    evaluated_table.resize(cols_size * rows_size);
 
+    for (size_t row = 0; row < rows_size; row++) {
+        for (size_t col = 0; col < cols_size; col++) {
+            if (!visited[cols_size * row + col]) {
+                evaluateCell(row, col);
+            }
+        }
+    }
 }
+
+void CSVTable::evaluateCell(size_t row, size_t col) {
+    if (isInteger(table[row][col])) { // проверка на целое
+        evaluated_table[cols_size * row + col] = (stoi(table[row][col]));
+        visited[cols_size * row + col] = true;
+    }
+    else { // проверка на соответствие виду, на целые числа в операндах, на валидность ссылок в операндах
+        set<string> empty_cell_stack;
+        evaluated_table[cols_size * row + col] = evaluateExpr(table[row][col], empty_cell_stack);
+    }
+}
+
+int CSVTable::evaluateExpr(const string &cell, set<string> &cell_stack) {
+    if (isInteger(cell)) {
+        return stoi(cell);
+    }
+
+    auto[l_operand, operation, r_operand] = parseExpr(cell);
+    // TODO:: проверять операнды на числа, если они не числа, то пытаться спарсить ссылку
+}
+
+tuple<string, char, string>
+CSVTable::parseExpr(const string &cell) {
+    if (cell[0] != '=') {
+        throw invalid_argument("Invalid cell format, can't meet '=' in cell");
+    }
+
+    auto pos = cell.find_first_of("+-*/");
+    if (pos == std::string::npos) {
+        throw invalid_argument("Invalid cell format, can't find operation in cell");
+    }
+    char operation = cell[pos];
+
+    pos = cell.find(operation);
+    string left = cell.substr(1, pos - 1);
+    string right = cell.substr(pos + 1);
+
+    return make_tuple(left, operation, right);
+}
+
+/*
+bool isExpression(const std::string &str) {
+    if (!str.empty()) {
+        if (str[0] != '=') {
+            return false;
+        }
+
+        for (int i = 0; i < str.size(); ++i) {
+
+        }
+
+        return true;
+    }
+    return false;
+}
+*/
+
+/*
+switch (operation) {
+            case '+':
+                return evaluateExpr(left, cell_stack) + evaluateExpr(right, cell_stack);
+            case '-':
+                return evaluateExpr(left, cell_stack) - evaluateExpr(right, cell_stack);
+            case '/':
+                if (right == "0") {
+                    throw std::logic_error("Can't divide by 0");
+                }
+                return evaluateExpr(left, cell_stack) / evaluateExpr(right, cell_stack);
+            case '*':
+                return evaluateExpr(left, cell_stack) * evaluateExpr(right, cell_stack);
+        }
+*/

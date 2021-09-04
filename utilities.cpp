@@ -1,23 +1,41 @@
 #include "utilities.h"
 
 #include <filesystem>
+#include <iostream>
 
-std::string parsePath(int argc, char *argv[]) {
+using namespace std;
+
+string parsePath(int argc, char *argv[]) {
     if (argc != 2) {
-        throw std::invalid_argument("Wrong number of arguments");
+        throw invalid_argument("Wrong number of arguments");
     }
     return argv[1];
 }
 
-void checkPath(const std::string &path) {
-    if (!std::filesystem::exists(path)) {
-        throw std::invalid_argument("No such file: " + path);
+void checkPath(const string &path) {
+    if (!filesystem::exists(path)) {
+        throw invalid_argument("No such file: " + path);
     }
     if (!path.ends_with(".csv")) {
-        throw std::invalid_argument("Received not a .csv file: " + path);
+        throw invalid_argument("Received not a .csv file: " + path);
     }
 }
 
-void deleteSpaces(std::string &str) {
+void deleteSpaces(string &str) {
     str.erase(remove_if(str.begin(), str.end(), ::isspace), str.end());
+}
+
+bool isInteger(const string &str) {
+    if (!str.empty()) {
+        if (str[0] != '-' && !isdigit(str[0])) {
+            return false;
+        }
+        for (int i = 1; i < str.size(); ++i) {
+            if (!isdigit(str[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
 }

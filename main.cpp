@@ -1,4 +1,5 @@
 #include <iostream>
+#include <regex>
 
 #include "test_runner.h"
 #include "Tests.h"
@@ -17,6 +18,7 @@ int main(int argc, char *argv[]) {
         RUN_TEST(tr, TestCSVTableHeader);
         RUN_TEST(tr, TestSimpleTable);
         RUN_TEST(tr, TestRows);
+        RUN_TEST(tr, TestIsInteger);
         cerr << endl;
     }
 
@@ -25,13 +27,17 @@ int main(int argc, char *argv[]) {
 
         CSVTable table(path);
 
-        auto res = table.getData();
-        for (auto &row: res) {
+        auto res1 = table.getData();
+        for (auto &row: res1) {
             for (auto &col: row) {
-                cout << "'" << col << "'" << ' ';
+                cout << col << ' ';
             }
             cout << endl;
         }
+        cout << endl;
+
+        table.evaluateTable();
+        table.printEvaluated();
     }
     catch (const invalid_argument &ex) {
         cerr << ex.what() << endl;

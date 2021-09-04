@@ -9,4 +9,6 @@ void checkPath(const std::string &path);
 
 void deleteSpaces(std::string &str);
 
+bool isInteger(const std::string &str);
+
 #endif //TESTTASK_UTILITIES_H

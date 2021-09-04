@@ -7,6 +7,19 @@
 
 #include <cstring>
 
+void TestIsInteger() {
+    ASSERT(isInteger("-15"));
+    ASSERT(isInteger("15"));
+    ASSERT(!isInteger("-15.3"));
+    ASSERT(!isInteger("l15"));
+    ASSERT(!isInteger("15l"));
+    ASSERT(!isInteger("1l5"));
+    ASSERT(!isInteger("1-5"));
+    ASSERT(!isInteger("-l5"));
+    ASSERT(!isInteger("+15"));
+    ASSERT(!isInteger(""));
+}
+
 void TestParsePath() {
     {
         try {
