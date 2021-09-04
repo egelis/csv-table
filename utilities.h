@@ -1,15 +1,12 @@
 #ifndef TESTTASK_UTILITIES_H
 #define TESTTASK_UTILITIES_H
 
-#include <filesystem>
-#include <exception>
+#include <string>
 
-string parsePath(int argc, char *argv[]) {
-    if (argc != 2) {
-        throw invalid_argument("Wrong number of arguments");
-    }
+std::string parsePath(int argc, char *argv[]);
 
-    return argv[1];
-}
+void checkPath(const std::string &path);
+
+void deleteSpaces(std::string &str);
 
 #endif //TESTTASK_UTILITIES_H
