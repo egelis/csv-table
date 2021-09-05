@@ -1,11 +1,11 @@
-##Build and run main program:
+## Build and run main program:
 >`./build.sh`
 > 
 > `cd build/`
 > 
 > `./TestTask file.csv`
 
-##Build and run test program:
+## Build and run test program:
 > `cd Test/`
 > 
 > `cd ./build.sh`
