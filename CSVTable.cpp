@@ -125,19 +125,40 @@ void CSVTable::evaluateTable() {
 
     for (size_t row = 0; row < rows_size; row++) {
         for (size_t col = 0; col < cols_size; col++) {
+            std::set<std::pair<size_t, size_t>> depended;
             if (!visited[cols_size * row + col]) {
-                evaluateCell(row, col);
+                evaluateCell(row, col, depended);
             }
         }
     }
 }
 
-void CSVTable::evaluateCell(size_t row, size_t col) {
-    if (isInteger(table[row][col])) {
-        addToEvaluatedAndSetVisited(row, col, stoi(table[row][col]));
-    } else {
-        evaluateExpr(row, col);
+int CSVTable::evaluateCell(size_t row, size_t col, std::set<std::pair<size_t, size_t>> &depended) {
+    // if call already evaluated
+    if (visited[cols_size * row + col]) {
+        return evaluated_table[cols_size * row + col];
     }
+    // if call is just a number
+    if (isInteger(table[row][col])) {
+        int val = stoi(table[row][col]);
+        addToEvaluatedAndSetVisited(row, col, val);
+        return val;
+    }
+
+    auto[l_operand, operation, r_operand] = parseExpr(table[row][col]);
+
+    auto unique_index = std::pair<size_t, size_t>{row, col};
+    depended.insert(unique_index);
+
+    int left  = evaluateOperand(l_operand, depended);
+    int right = evaluateOperand(r_operand, depended);
+
+    depended.erase(unique_index);
+
+    int result = applyOperator(operation, left, right);
+
+    addToEvaluatedAndSetVisited(row, col, result);
+    return result;
 }
 
 void CSVTable::addToEvaluatedAndSetVisited(size_t row, size_t col, int value) {
@@ -145,34 +166,18 @@ void CSVTable::addToEvaluatedAndSetVisited(size_t row, size_t col, int value) {
     visited[cols_size * row + col] = true;
 }
 
-int CSVTable::evaluateExpr(size_t row, size_t col) {
-    auto[l_operand, operation, r_operand] = parseExpr(table[row][col]);
-
-    int left  = isInteger(l_operand) ? stoi(l_operand) : evaluateRef(l_operand);
-    int right = isInteger(r_operand) ? stoi(r_operand) : evaluateRef(r_operand);
-
+int CSVTable::evaluateOperand(string &operand, set<pair<size_t, size_t>> &depended) {
     int result;
-    switch (operation) {
-        case '+':
-            result = left + right;
-            break;
-        case '-':
-            result = left - right;
-            break;
-        case '*':
-            result = left * right;
-            break;
-        case '/':
-            if (right == 0) {
-                throw std::invalid_argument("Division by 0");
-            }
-            result = left / right;
-            break;
-        default:
-            throw invalid_argument("Invalid operator in expression");
+    if (isInteger(operand)){
+        result = stoi(operand);
+    } else {
+        auto[row, col] = parseRef(operand);
+        auto unique_index = std::pair{row, col};
+        if (depended.contains(unique_index)) {
+            throw invalid_argument("Invalid cell format, cycle dependencies");
+        }
+        result = evaluateCell(row, col, depended);
     }
-
-    addToEvaluatedAndSetVisited(row, col, result);
     return result;
 }
 
@@ -197,18 +202,6 @@ CSVTable::parseExpr(const string &cell) {
     string right = cell.substr(operation_pos + 1);
 
     return make_tuple(left, operation, right);
-}
-
-int CSVTable::evaluateRef(const string &ref) {
-    auto[row, col] = parseRef(ref);
-
-    if (isInteger(table[row][col])) {
-        int number = stoi(table[row][col]);
-        addToEvaluatedAndSetVisited(row, col, number);
-        return number;
-    } else {
-        return evaluateExpr(row, col);
-    }
 }
 
 tuple<int, int>

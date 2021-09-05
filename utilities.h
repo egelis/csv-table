@@ -14,4 +14,6 @@ bool isInteger(const std::string &str);
 
 std::map<int, std::string> reverseMap(const std::map<std::string, int> &m);
 
+int applyOperator(char op, int left, int right);
+
 #endif //TESTTASK_UTILITIES_H

@@ -42,10 +42,8 @@ private:
     void parseRowNum(stringstream &ss, int index);
     void parseHeader(const string &header);
 
-    void evaluateCell(size_t row, size_t col);
-    int evaluateExpr(size_t row, size_t col);
-    int evaluateRef(const string &ref);
-
+    int evaluateCell(size_t row, size_t col, set<pair<size_t, size_t>> &depended);
+    int evaluateOperand(string &operand, set<pair<size_t, size_t>> &depended);
     tuple<int, int> parseRef(const string &ref);
 };
 

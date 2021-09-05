@@ -47,3 +47,27 @@ map<int, string> reverseMap(const map<string, int> &m) {
     }
     return reversed;
 }
+
+int applyOperator(char op, int left, int right) {
+    int result = 0;
+    switch (op) {
+        case '+':
+            result = left + right;
+            break;
+        case '-':
+            result = left - right;
+            break;
+        case '*':
+            result = left * right;
+            break;
+        case '/':
+            if (right == 0) {
+                throw std::invalid_argument("Division by 0");
+            }
+            result = left / right;
+            break;
+        default:
+            throw invalid_argument("Invalid operator in expression");
+    }
+    return result;
+}

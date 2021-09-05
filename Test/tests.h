@@ -319,6 +319,17 @@ void TestHardTable() {
 
         ASSERT_EQUAL(oss.str(), expected);
     }
+
+    {
+        try {
+            CSVTable table("../tests/hard11.csv");
+            table.evaluateTable();
+            FAIL("'Invalid cell format, cycle dependencies'");
+        }
+        catch (const invalid_argument &ex) {
+            ASSERT(strcmp(ex.what(), "Invalid cell format, cycle dependencies") == 0);
+        }
+    }
 }
 
 #endif //TESTTASK_TESTS_H
