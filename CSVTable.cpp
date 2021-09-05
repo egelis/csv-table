@@ -148,7 +148,7 @@ void CSVTable::addToEvaluatedAndSetVisited(size_t row, size_t col, int value) {
 int CSVTable::evaluateExpr(size_t row, size_t col) {
     auto[l_operand, operation, r_operand] = parseExpr(table[row][col]);
 
-    int left = isInteger(l_operand) ? stoi(l_operand) : evaluateRef(l_operand);
+    int left  = isInteger(l_operand) ? stoi(l_operand) : evaluateRef(l_operand);
     int right = isInteger(r_operand) ? stoi(r_operand) : evaluateRef(r_operand);
 
     int result;
