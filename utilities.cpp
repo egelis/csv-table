@@ -39,20 +39,6 @@ bool isInteger(const string &str) {
     return false;
 }
 
-void checkRef(const std::string &ref) {
-    size_t pos;
-    for (pos = 0; pos < ref.size(); ++pos) {
-        if (isdigit(ref[pos]))
-            break;
-    }
-
-    for (;pos < ref.size(); ++pos) {
-        if (!isdigit(ref[pos])) {
-            throw invalid_argument("Invalid reference to the cell, 1");
-        }
-    }
-}
-
 map<int, string> reverseMap(const map<string, int> &m) {
     map<int, string> reversed;
     for (const auto &[key, value]: m) {

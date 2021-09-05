@@ -27,16 +27,12 @@ int main(int argc, char *argv[]) {
 
         CSVTable table(path);
         table.evaluateTable();
-        table.printEvaluated();
+        table.printEvaluated(cout);
     }
     catch (const invalid_argument &ex) {
         cerr << ex.what() << endl;
         return 1;
     }
-
-    /*parseRef("Cell30");
-    parseRef("30Cell");
-    parseRef("Ce30ll");*/
 
     return 0;
 }

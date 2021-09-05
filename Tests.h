@@ -177,36 +177,147 @@ void TestRows() {
 
 void TestSimpleTable() {
     {
-        vector<int> expected = {1, 0, -1,
-                                2, 6, 0,
-                                0, 19, 5,
-                                -15, 3, 99};
+        string expected = ",A,B,Cell\n"
+                          "1,1,0,-1\n"
+                          "2,2,6,0\n"
+                          "30,0,19,5\n"
+                          "15,-15,3,99\n";
 
         CSVTable table("../Tests/simple.csv");
         table.evaluateTable();
-        ASSERT_EQUAL(table.getEvaluated(), expected);
+
+        ostringstream oss;
+        table.printEvaluated(oss);
+
+        ASSERT_EQUAL(oss.str(), expected);
     }
 }
 
 void TestHardTable() {
     {
-//        vector<string> expected = {"", "A", "B", "C", "D", "E", "F", "G", "Cell",
-//                                   "1", "1", "0", "1", "2", "8", "1", "4", "9",
-//                                   "2", "2", "26", "0", "9", "123", "9", "60", "90",
-//                                   "3", "9", "28", "9", "10", "6", "23", "7", "1",
-//                                   "4", "6", "8", "9", "1", "2", "7", "9", "0",
-//                                   "5", "3", "6", "123", "3", "13", "90", "28", "6",
-//                                   "30", "0", "1", "5", "7", "6", "9", "10", "25"};
-        vector<int> expected = {1, 0, 1, 2, 8, 1, 4, 9,
-                                2, 26, 0, 9, 123, 9, 60, 90,
-                                9, 28, 9, 10, 6, 23, 7, 1,
-                                6, 8, 9, 1, 2, 7, 9, 0,
-                                3, 6, 123, 3, 13, 90, 28, 6,
-                                0, 1, 5, 7, 6, 9, 10, 25};
+        string expected = ",A,B,C,D,E,F,G,Cell\n"
+                          "1,1,0,1,2,8,1,4,9\n"
+                          "2,2,26,0,9,123,9,60,90\n"
+                          "3,9,28,9,10,6,23,7,1\n"
+                          "4,6,8,9,1,2,7,9,0\n"
+                          "5,3,6,123,3,13,90,28,6\n"
+                          "30,0,1,5,7,6,9,10,25\n";
 
         CSVTable table("../Tests/hard1.csv");
         table.evaluateTable();
-        ASSERT_EQUAL(table.getEvaluated(), expected);
+
+        ostringstream oss;
+        table.printEvaluated(oss);
+
+        ASSERT_EQUAL(oss.str(), expected);
+    }
+
+    {
+        string expected = ",A,B,C\n"
+                          "1,5,5,5\n"
+                          "30,5,5,5\n"
+                          "2,5,5,5\n";
+
+        CSVTable table("../Tests/hard2.csv");
+        table.evaluateTable();
+
+        ostringstream oss;
+        table.printEvaluated(oss);
+
+        ASSERT_EQUAL(oss.str(), expected);
+    }
+
+    {
+        try {
+            CSVTable table("../Tests/hard3.csv");
+            table.evaluateTable();
+            FAIL("'Invalid cell format, reference to a non-existent cell'");
+        }
+        catch (const invalid_argument &ex) {
+            ASSERT(strcmp(ex.what(), "Invalid cell format, reference to a non-existent cell") == 0);
+        }
+    }
+
+    {
+        try {
+            CSVTable table("../Tests/hard4.csv");
+            table.evaluateTable();
+            FAIL("'Invalid cell format, '=' expected in cell'");
+        }
+        catch (const invalid_argument &ex) {
+            ASSERT(strcmp(ex.what(), "Invalid cell format, '=' expected in cell") == 0);
+        }
+    }
+
+    {
+        try {
+            CSVTable table("../Tests/hard5.csv");
+            table.evaluateTable();
+            FAIL("'Invalid cell format, can't find operation in expression'");
+        }
+        catch (const invalid_argument &ex) {
+            ASSERT(strcmp(ex.what(), "Invalid cell format, can't find operation in expression") == 0);
+        }
+    }
+
+    {
+        try {
+            CSVTable table("../Tests/hard6.csv");
+            table.evaluateTable();
+            FAIL("'Invalid reference to a cell'");
+        }
+        catch (const invalid_argument &ex) {
+            ASSERT(strcmp(ex.what(), "Invalid reference to a cell") == 0);
+        }
+    }
+
+    {
+        try {
+            CSVTable table("../Tests/hard7.csv");
+            table.evaluateTable();
+            FAIL("'Invalid reference to a cell'");
+        }
+        catch (const invalid_argument &ex) {
+            ASSERT(strcmp(ex.what(), "Invalid reference to a cell") == 0);
+        }
+    }
+
+    {
+        try {
+            CSVTable table("../Tests/hard8.csv");
+            table.evaluateTable();
+            FAIL("'Invalid reference to a cell'");
+        }
+        catch (const invalid_argument &ex) {
+            ASSERT(strcmp(ex.what(), "Invalid reference to a cell") == 0);
+        }
+    }
+
+    {
+        try {
+            CSVTable table("../Tests/hard9.csv");
+            table.evaluateTable();
+            FAIL("'Division by 0'");
+        }
+        catch (const invalid_argument &ex) {
+            ASSERT(strcmp(ex.what(), "Division by 0") == 0);
+        }
+    }
+
+    {
+        string expected = ",A,B,Cell\n"
+                          "1,1,0,-1\n"
+                          "2,2,6,2\n"
+                          "30,0,1,5\n"
+                          "5,2,1,5\n";
+
+        CSVTable table("../Tests/hard10.csv");
+        table.evaluateTable();
+
+        ostringstream oss;
+        table.printEvaluated(oss);
+
+        ASSERT_EQUAL(oss.str(), expected);
     }
 }
 

@@ -12,8 +12,6 @@ void deleteSpaces(std::string &str);
 
 bool isInteger(const std::string &str);
 
-void checkRef(const std::string &ref);
-
 std::map<int, std::string> reverseMap(const std::map<std::string, int> &m);
 
 #endif //TESTTASK_UTILITIES_H

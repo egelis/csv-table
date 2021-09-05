@@ -101,90 +101,89 @@ void CSVTable::checkRowNumCell(const string &cell) {
     }
 }
 
-vector<int> CSVTable::getEvaluated() {
-    return evaluated_table;
-}
-
-void CSVTable::printEvaluated() {
+void CSVTable::printEvaluated(ostream &os) {
     auto index_to_col = reverseMap(col_to_index);
     auto index_to_row = reverseMap(row_to_index);
 
     for (const auto &[index, col]: index_to_col) {
-        cout << "," << col;
+        os << "," << col;
     }
-    cout << endl;
+    os << endl;
 
     for (int row = 0; row < rows_size; row++) {
-        cout << index_to_row[row];
+        os << index_to_row[row];
         for (int col = 0; col < cols_size; col++) {
-            cout << "," << evaluated_table[cols_size * row + col];
+            os << "," << evaluated_table[cols_size * row + col];
         }
-        cout << endl;
+        os << endl;
     }
 }
-
-/*
- * Считываем ячейку:
- * - Если ячейка - число, то проверяем 'целое ли оно'
- * - Если это выражение, то вызываем evaluateCell(cell), где проверяем на 'соответствие виду =Arg1 OP Arg2',
- * 'если аргументы являются числами, то они целые', 'если есть ссылки, то они валидные'
- */
 
 void CSVTable::evaluateTable() {
     visited.resize(cols_size * rows_size, false);
     evaluated_table.resize(cols_size * rows_size);
 
+    int count = 0;
     for (size_t row = 0; row < rows_size; row++) {
         for (size_t col = 0; col < cols_size; col++) {
             if (!visited[cols_size * row + col]) {
+                count++;
                 evaluateCell(row, col);
             }
         }
     }
+    cout << "Count: " << count << endl;
 }
 
 void CSVTable::evaluateCell(size_t row, size_t col) {
     if (isInteger(table[row][col])) {
-        evaluated_table[cols_size * row + col] = (stoi(table[row][col]));
-        visited[cols_size * row + col] = true;
+        addToEvaluatedAndSetVisited(row, col, stoi(table[row][col]));
     }
     else {
         set<string> empty_cell_stack;
-        evaluated_table[cols_size * row + col] = evaluateExpr(table[row][col], empty_cell_stack);
+        evaluateExpr(row, col);
     }
 }
 
-int CSVTable::evaluateExpr(const string &cell, set<string> &cell_stack) {
-    if (isInteger(cell)) {
-        return stoi(cell);
-    }
+void CSVTable::addToEvaluatedAndSetVisited(size_t row, size_t col, int value) {
+    evaluated_table[cols_size * row + col] = value;
+    visited[cols_size * row + col] = true;
+}
+
+int CSVTable::evaluateExpr(size_t row, size_t col) {
+    const string &cell = table[row][col];
 
     auto[l_operand, operation, r_operand] = parseExpr(cell);
 
-    auto left  = isInteger(l_operand) ? stoi(l_operand) : parseRef(l_operand);
-    auto right = isInteger(r_operand) ? stoi(r_operand) : parseRef(r_operand);
+    int left  = isInteger(l_operand) ? stoi(l_operand) : evaluateRef(l_operand);
+    int right = isInteger(r_operand) ? stoi(r_operand) : evaluateRef(r_operand);
 
+    int result;
     switch (operation) {
         case '+':
-            return left + right;
+            result = left + right;
+            break;
         case '-':
-            return left - right;
+            result = left - right;
+            break;
         case '*':
-            return left * right;
+            result = left * right;
+            break;
         case '/':
             if (right == 0) {
                 throw std::invalid_argument("Division by 0");
             }
-            return left / right;
+            result = left / right;
+            break;
         default:
             throw invalid_argument("Invalid operator in expression");
     }
 
-    // visited = true;
-    // evaluated_table +
+    addToEvaluatedAndSetVisited(row, col, result);
+    return result;
 }
 
-int CSVTable::parseRef(const string &ref) {
+int CSVTable::evaluateRef(const string &ref) {
     checkRef(ref);
 
     size_t pos = ref.find_first_of("123456789");
@@ -192,11 +191,37 @@ int CSVTable::parseRef(const string &ref) {
     string row = ref.substr(pos);
 
     if (!col_to_index.count(col) || !row_to_index.count(row)) {
-        throw invalid_argument("Invalid reference to the cell, 2");
+        throw invalid_argument("Invalid cell format, reference to a non-existent cell");
     }
 
-    set<string> empty_cell_stack;
-    return evaluateExpr(table[row_to_index[row]][col_to_index[col]], empty_cell_stack);
+    auto col_ind = col_to_index[col];
+    auto row_ind = row_to_index[row];
+
+    if (isInteger(table[row_ind][col_ind])) {
+        int number = stoi(table[row_ind][col_ind]);
+        addToEvaluatedAndSetVisited(row_ind, col_ind,number);
+        return number;
+    } else {
+        return evaluateExpr(row_to_index[row], col_to_index[col]);
+    }
+}
+
+void CSVTable::checkRef(const std::string &ref) {
+    if (ref.empty()) {
+        throw invalid_argument("Invalid reference to a cell");
+    }
+
+    size_t pos;
+    for (pos = 0; pos < ref.size(); ++pos) {
+        if (isdigit(ref[pos]))
+            break;
+    }
+
+    for (;pos < ref.size(); ++pos) {
+        if (!isdigit(ref[pos])) {
+            throw invalid_argument("Invalid reference to a cell");
+        }
+    }
 }
 
 tuple<string, char, string>

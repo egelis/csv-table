@@ -114,7 +114,7 @@ private:
 }
 
 #define FAIL(str)                       \
-    Fail(str);                          \
+    Fail(str);
 
-#define RUN_TEST(tr, func) \
+#define RUN_TEST(tr, func)              \
   tr.RunTest(func, #func)

@@ -27,9 +27,7 @@ public:
 
     void evaluateTable();
 
-    vector<int> getEvaluated();
-
-    void printEvaluated();
+    void printEvaluated(ostream &os);
 
 private:
     void checkHeaderCell(const string &cell);
@@ -41,9 +39,13 @@ private:
     void getRowNum(stringstream &ss, int index);
 
     void evaluateCell(size_t row, size_t col);
-    int evaluateExpr(const string &cell, std::set<string> &cell_stack);
+    int evaluateExpr(size_t row, size_t col);
     tuple<string, char, string> parseExpr(const string &cell);
-    int parseRef(const string &srt);
+    int evaluateRef(const string &ref);
+
+    void addToEvaluatedAndSetVisited(size_t row, size_t col, int value);
+
+    void checkRef(const string &ref);
 };
 
 
