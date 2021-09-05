@@ -8,7 +8,7 @@
 ## Build and run test program:
 > `cd Test/`
 > 
-> `cd ./build.sh`
+> `./build.sh`
 > 
 > `cd build/`
 > 
