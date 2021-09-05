@@ -113,17 +113,6 @@ void TestCSVTableHeader() {
     }
 }
 
-void TestSimpleTable() {
-    {
-        vector<vector<string>> expected = {{"1",   "0",  "-1"},
-                                           {"2",   "6",  "0"},
-                                           {"0",   "19", "5"},
-                                           {"-15", "3",  "99"}};
-        CSVTable table("../Tests/simple.csv");
-        ASSERT_EQUAL(table.getData(), expected);
-    }
-}
-
 void TestRows() {
     {
         try {
@@ -183,6 +172,41 @@ void TestRows() {
         catch (const invalid_argument &ex) {
             ASSERT(strcmp(ex.what(), "Incorrect table format, there can be no letters in the row name") == 0);
         }
+    }
+}
+
+void TestSimpleTable() {
+    {
+        vector<int> expected = {1, 0, -1,
+                                2, 6, 0,
+                                0, 19, 5,
+                                -15, 3, 99};
+
+        CSVTable table("../Tests/simple.csv");
+        table.evaluateTable();
+        ASSERT_EQUAL(table.getEvaluated(), expected);
+    }
+}
+
+void TestHardTable() {
+    {
+//        vector<string> expected = {"", "A", "B", "C", "D", "E", "F", "G", "Cell",
+//                                   "1", "1", "0", "1", "2", "8", "1", "4", "9",
+//                                   "2", "2", "26", "0", "9", "123", "9", "60", "90",
+//                                   "3", "9", "28", "9", "10", "6", "23", "7", "1",
+//                                   "4", "6", "8", "9", "1", "2", "7", "9", "0",
+//                                   "5", "3", "6", "123", "3", "13", "90", "28", "6",
+//                                   "30", "0", "1", "5", "7", "6", "9", "10", "25"};
+        vector<int> expected = {1, 0, 1, 2, 8, 1, 4, 9,
+                                2, 26, 0, 9, 123, 9, 60, 90,
+                                9, 28, 9, 10, 6, 23, 7, 1,
+                                6, 8, 9, 1, 2, 7, 9, 0,
+                                3, 6, 123, 3, 13, 90, 28, 6,
+                                0, 1, 5, 7, 6, 9, 10, 25};
+
+        CSVTable table("../Tests/hard1.csv");
+        table.evaluateTable();
+        ASSERT_EQUAL(table.getEvaluated(), expected);
     }
 }
 

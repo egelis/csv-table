@@ -14,6 +14,7 @@ using namespace std;
 class CSVTable {
 private:
     ifstream in;
+
     vector<bool> visited;
     map<string, int> col_to_index, row_to_index;
     size_t cols_size, rows_size;
@@ -25,8 +26,6 @@ public:
     explicit CSVTable(const string &path);
 
     void evaluateTable();
-
-    vector<vector<string>> getData();
 
     vector<int> getEvaluated();
 
@@ -43,9 +42,7 @@ private:
 
     void evaluateCell(size_t row, size_t col);
     int evaluateExpr(const string &cell, std::set<string> &cell_stack);
-
     tuple<string, char, string> parseExpr(const string &cell);
-
     int parseRef(const string &srt);
 };
 

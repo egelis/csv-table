@@ -15,9 +15,10 @@ int main(int argc, char *argv[]) {
         RUN_TEST(tr, TestParsePath);
         RUN_TEST(tr, TestCSVTableGetPath);
         RUN_TEST(tr, TestCSVTableHeader);
-        RUN_TEST(tr, TestSimpleTable);
         RUN_TEST(tr, TestRows);
         RUN_TEST(tr, TestIsInteger);
+        RUN_TEST(tr, TestSimpleTable);
+        RUN_TEST(tr, TestHardTable);
         cerr << endl;
     }
 
@@ -25,16 +26,6 @@ int main(int argc, char *argv[]) {
         string path = parsePath(argc, argv);
 
         CSVTable table(path);
-
-        auto res1 = table.getData();
-        for (auto &row: res1) {
-            for (auto &col: row) {
-                cout << col << ' ';
-            }
-            cout << endl;
-        }
-        cout << endl;
-
         table.evaluateTable();
         table.printEvaluated();
     }

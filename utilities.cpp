@@ -1,7 +1,6 @@
 #include "utilities.h"
 
 #include <filesystem>
-#include <iostream>
 
 using namespace std;
 
@@ -49,8 +48,15 @@ void checkRef(const std::string &ref) {
 
     for (;pos < ref.size(); ++pos) {
         if (!isdigit(ref[pos])) {
-            cout << ref << endl;
             throw invalid_argument("Invalid reference to the cell, 1");
         }
     }
+}
+
+map<int, string> reverseMap(const map<string, int> &m) {
+    map<int, string> reversed;
+    for (const auto &[key, value]: m) {
+        reversed[value] = key;
+    }
+    return reversed;
 }

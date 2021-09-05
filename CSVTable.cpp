@@ -101,18 +101,23 @@ void CSVTable::checkRowNumCell(const string &cell) {
     }
 }
 
-vector<vector<string>> CSVTable::getData() {
-    return table;
-}
-
 vector<int> CSVTable::getEvaluated() {
     return evaluated_table;
 }
 
 void CSVTable::printEvaluated() {
-    for (size_t row = 0; row < rows_size; row++) {
-        for (size_t col = 0; col < cols_size; col++) {
-            cout << evaluated_table[cols_size * row + col] << ' ';
+    auto index_to_col = reverseMap(col_to_index);
+    auto index_to_row = reverseMap(row_to_index);
+
+    for (const auto &[index, col]: index_to_col) {
+        cout << "," << col;
+    }
+    cout << endl;
+
+    for (int row = 0; row < rows_size; row++) {
+        cout << index_to_row[row];
+        for (int col = 0; col < cols_size; col++) {
+            cout << "," << evaluated_table[cols_size * row + col];
         }
         cout << endl;
     }
@@ -139,11 +144,11 @@ void CSVTable::evaluateTable() {
 }
 
 void CSVTable::evaluateCell(size_t row, size_t col) {
-    if (isInteger(table[row][col])) { // проверка на целое
+    if (isInteger(table[row][col])) {
         evaluated_table[cols_size * row + col] = (stoi(table[row][col]));
         visited[cols_size * row + col] = true;
     }
-    else { // проверка на соответствие виду, на целые числа в операндах, на валидность ссылок в операндах
+    else {
         set<string> empty_cell_stack;
         evaluated_table[cols_size * row + col] = evaluateExpr(table[row][col], empty_cell_stack);
     }
@@ -156,7 +161,7 @@ int CSVTable::evaluateExpr(const string &cell, set<string> &cell_stack) {
 
     auto[l_operand, operation, r_operand] = parseExpr(cell);
 
-    auto left = isInteger(l_operand) ? stoi(l_operand) : parseRef(l_operand);
+    auto left  = isInteger(l_operand) ? stoi(l_operand) : parseRef(l_operand);
     auto right = isInteger(r_operand) ? stoi(r_operand) : parseRef(r_operand);
 
     switch (operation) {
