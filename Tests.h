@@ -264,10 +264,10 @@ void TestHardTable() {
         try {
             CSVTable table("../Tests/hard6.csv");
             table.evaluateTable();
-            FAIL("'Invalid reference to a cell'");
+            FAIL("'Invalid cell format, no operand found'");
         }
         catch (const invalid_argument &ex) {
-            ASSERT(strcmp(ex.what(), "Invalid reference to a cell") == 0);
+            ASSERT(strcmp(ex.what(), "Invalid cell format, no operand found") == 0);
         }
     }
 

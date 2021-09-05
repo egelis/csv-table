@@ -25,18 +25,19 @@ void deleteSpaces(string &str) {
 }
 
 bool isInteger(const string &str) {
-    if (!str.empty()) {
-        if (str[0] != '-' && !isdigit(str[0])) {
+    if (str.empty()) {
+        return false;
+    }
+
+    if (str[0] != '-' && !isdigit(str[0])) {
+        return false;
+    }
+    for (int i = 1; i < str.size(); ++i) {
+        if (!isdigit(str[i])) {
             return false;
         }
-        for (int i = 1; i < str.size(); ++i) {
-            if (!isdigit(str[i])) {
-                return false;
-            }
-        }
-        return true;
     }
-    return false;
+    return true;
 }
 
 map<int, string> reverseMap(const map<string, int> &m) {

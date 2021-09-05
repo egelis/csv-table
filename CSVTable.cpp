@@ -58,7 +58,7 @@ vector<string> CSVTable::parseNextRow(const string &line, int index) {
     vector<string> row;
     stringstream ss(line);
 
-    getRowNum(ss, index);
+    parseRowNum(ss, index);
 
     string cell;
     while (getline(ss, cell, ',')) {
@@ -76,7 +76,7 @@ vector<string> CSVTable::parseNextRow(const string &line, int index) {
     return row;
 }
 
-void CSVTable::getRowNum(stringstream &ss, int index) {
+void CSVTable::parseRowNum(stringstream &ss, int index) {
     string cell;
 
     getline(ss, cell, ',');
@@ -123,24 +123,19 @@ void CSVTable::evaluateTable() {
     visited.resize(cols_size * rows_size, false);
     evaluated_table.resize(cols_size * rows_size);
 
-    int count = 0;
     for (size_t row = 0; row < rows_size; row++) {
         for (size_t col = 0; col < cols_size; col++) {
             if (!visited[cols_size * row + col]) {
-                count++;
                 evaluateCell(row, col);
             }
         }
     }
-    cout << "Count: " << count << endl;
 }
 
 void CSVTable::evaluateCell(size_t row, size_t col) {
     if (isInteger(table[row][col])) {
         addToEvaluatedAndSetVisited(row, col, stoi(table[row][col]));
-    }
-    else {
-        set<string> empty_cell_stack;
+    } else {
         evaluateExpr(row, col);
     }
 }
@@ -151,11 +146,9 @@ void CSVTable::addToEvaluatedAndSetVisited(size_t row, size_t col, int value) {
 }
 
 int CSVTable::evaluateExpr(size_t row, size_t col) {
-    const string &cell = table[row][col];
+    auto[l_operand, operation, r_operand] = parseExpr(table[row][col]);
 
-    auto[l_operand, operation, r_operand] = parseExpr(cell);
-
-    int left  = isInteger(l_operand) ? stoi(l_operand) : evaluateRef(l_operand);
+    int left = isInteger(l_operand) ? stoi(l_operand) : evaluateRef(l_operand);
     int right = isInteger(r_operand) ? stoi(r_operand) : evaluateRef(r_operand);
 
     int result;
@@ -183,7 +176,43 @@ int CSVTable::evaluateExpr(size_t row, size_t col) {
     return result;
 }
 
+tuple<string, char, string>
+CSVTable::parseExpr(const string &cell) {
+    if (cell[0] != '=') {
+        throw invalid_argument("Invalid cell format, '=' expected in cell");
+    }
+
+    int start_pos = 0;
+    if (cell[1] == '-') {
+        start_pos = 2;
+    }
+
+    auto operation_pos = cell.find_first_of("+-*/", start_pos);
+    if (operation_pos == std::string::npos) {
+        throw invalid_argument("Invalid cell format, can't find operation in expression");
+    }
+
+    char operation = cell[operation_pos];
+    string left = cell.substr(1, operation_pos - 1);
+    string right = cell.substr(operation_pos + 1);
+
+    return make_tuple(left, operation, right);
+}
+
 int CSVTable::evaluateRef(const string &ref) {
+    auto[row, col] = parseRef(ref);
+
+    if (isInteger(table[row][col])) {
+        int number = stoi(table[row][col]);
+        addToEvaluatedAndSetVisited(row, col, number);
+        return number;
+    } else {
+        return evaluateExpr(row, col);
+    }
+}
+
+tuple<int, int>
+CSVTable::parseRef(const std::string &ref) {
     checkRef(ref);
 
     size_t pos = ref.find_first_of("123456789");
@@ -194,21 +223,12 @@ int CSVTable::evaluateRef(const string &ref) {
         throw invalid_argument("Invalid cell format, reference to a non-existent cell");
     }
 
-    auto col_ind = col_to_index[col];
-    auto row_ind = row_to_index[row];
-
-    if (isInteger(table[row_ind][col_ind])) {
-        int number = stoi(table[row_ind][col_ind]);
-        addToEvaluatedAndSetVisited(row_ind, col_ind,number);
-        return number;
-    } else {
-        return evaluateExpr(row_to_index[row], col_to_index[col]);
-    }
+    return make_tuple(row_to_index[row], col_to_index[col]);
 }
 
 void CSVTable::checkRef(const std::string &ref) {
     if (ref.empty()) {
-        throw invalid_argument("Invalid reference to a cell");
+        throw invalid_argument("Invalid cell format, no operand found");
     }
 
     size_t pos;
@@ -217,28 +237,9 @@ void CSVTable::checkRef(const std::string &ref) {
             break;
     }
 
-    for (;pos < ref.size(); ++pos) {
+    for (; pos < ref.size(); ++pos) {
         if (!isdigit(ref[pos])) {
             throw invalid_argument("Invalid reference to a cell");
         }
     }
-}
-
-tuple<string, char, string>
-CSVTable::parseExpr(const string &cell) {
-    if (cell[0] != '=') {
-        throw invalid_argument("Invalid cell format, '=' expected in cell");
-    }
-
-    auto pos = cell.find_first_of("+-*/");
-    if (pos == std::string::npos) {
-        throw invalid_argument("Invalid cell format, can't find operation in expression");
-    }
-    char operation = cell[pos];
-
-    pos = cell.find(operation);
-    string left = cell.substr(1, pos - 1);
-    string right = cell.substr(pos + 1);
-
-    return make_tuple(left, operation, right);
 }
