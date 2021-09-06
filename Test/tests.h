@@ -23,7 +23,7 @@ void TestIsInteger() {
 void TestParsePath() {
     {
         try {
-            char *argv[3] = {(char *) "..TestTask", (char *) "Test/in.csv", (char *) "Test/in.txt"};
+            char *argv[3] = {(char *) "..TestTask", (char *) "../tests/in.csv", (char *) "../tests/in.txt"};
             auto path = parsePath(3, argv);
             FAIL("'Wrong number of arguments'");
         }
@@ -64,7 +64,7 @@ void TestCSVTableGetPath() {
 void TestCSVTableHeader() {
     {
         try {
-            CSVTable table("../tests/header1.csv");
+            CSVTable table("../tests/invalid_header1.csv");
             FAIL("'Table has repeated cells in header'");
         }
         catch (const invalid_argument &ex) {
@@ -74,7 +74,7 @@ void TestCSVTableHeader() {
 
     {
         try {
-            CSVTable table("../tests/header2.csv");
+            CSVTable table("../tests/invalid_header2.csv");
             FAIL("'Table has repeated cells in header'");
         }
         catch (const invalid_argument &ex) {
@@ -84,7 +84,7 @@ void TestCSVTableHeader() {
 
     {
         try {
-            CSVTable table("../tests/header3.csv");
+            CSVTable table("../tests/invalid_header3.csv");
             FAIL("'Incorrect table format, first cell must be empty'");
         }
         catch (const invalid_argument &ex) {
@@ -94,7 +94,7 @@ void TestCSVTableHeader() {
 
     {
         try {
-            CSVTable table("../tests/header4.csv");
+            CSVTable table("../tests/invalid_header4.csv");
             FAIL("'Incorrect table format, has empty column name'");
         }
         catch (const invalid_argument &ex) {
@@ -104,7 +104,7 @@ void TestCSVTableHeader() {
 
     {
         try {
-            CSVTable table("../tests/header5.csv");
+            CSVTable table("../tests/invalid_header5.csv");
             FAIL("'Incorrect table format, there can be no numbers in the column name'");
         }
         catch (const invalid_argument &ex) {
@@ -113,10 +113,10 @@ void TestCSVTableHeader() {
     }
 }
 
-void TestRows() {
+void TestCSVTableRows() {
     {
         try {
-            CSVTable table("../tests/row1.csv");
+            CSVTable table("../tests/invalid_row1.csv");
             FAIL("'Incorrect table format, has empty row number'");
         }
         catch (const invalid_argument &ex) {
@@ -126,7 +126,7 @@ void TestRows() {
 
     {
         try {
-            CSVTable table("../tests/row2.csv");
+            CSVTable table("../tests/invalid_row2.csv");
             FAIL("'Incorrect table format, row number isn't positive'");
         }
         catch (const invalid_argument &ex) {
@@ -136,7 +136,7 @@ void TestRows() {
 
     {
         try {
-            CSVTable table("../tests/row3.csv");
+            CSVTable table("../tests/invalid_row3.csv");
             FAIL("'Incorrect table format, table has repeated rows names'");
         }
         catch (const invalid_argument &ex) {
@@ -146,7 +146,7 @@ void TestRows() {
 
     {
         try {
-            CSVTable table("../tests/row4.csv");
+            CSVTable table("../tests/invalid_row4.csv");
             FAIL("'Incorrect table format, has empty cell'");
         }
         catch (const invalid_argument &ex) {
@@ -156,7 +156,7 @@ void TestRows() {
 
     {
         try {
-            CSVTable table("../tests/row5.csv");
+            CSVTable table("../tests/invalid_row5.csv");
             FAIL("'Incorrect table format, wrong row size'");
         }
         catch (const invalid_argument &ex) {
@@ -166,7 +166,7 @@ void TestRows() {
 
     {
         try {
-            CSVTable table("../tests/row6.csv");
+            CSVTable table("../tests/invalid_row6.csv");
             FAIL("'Incorrect table format, there can be no letters in the row name'");
         }
         catch (const invalid_argument &ex) {
@@ -175,7 +175,7 @@ void TestRows() {
     }
 }
 
-void TestSimpleTable() {
+void TestCSVTableExamples() {
     {
         string expected = ",A,B,Cell\n"
                           "1,1,0,-1\n"
@@ -183,7 +183,7 @@ void TestSimpleTable() {
                           "30,0,19,5\n"
                           "15,-15,3,99\n";
 
-        CSVTable table("../tests/simple.csv");
+        CSVTable table("../tests/example1.csv");
         table.evaluateTable();
 
         ostringstream oss;
@@ -191,9 +191,7 @@ void TestSimpleTable() {
 
         ASSERT_EQUAL(oss.str(), expected);
     }
-}
 
-void TestHardTable() {
     {
         string expected = ",A,B,C,D,E,F,G,Cell\n"
                           "1,1,0,1,2,8,1,4,9\n"
@@ -203,7 +201,7 @@ void TestHardTable() {
                           "5,3,6,123,3,13,90,28,6\n"
                           "30,0,1,5,7,6,9,10,25\n";
 
-        CSVTable table("../tests/hard1.csv");
+        CSVTable table("../tests/example2.csv");
         table.evaluateTable();
 
         ostringstream oss;
@@ -218,7 +216,7 @@ void TestHardTable() {
                           "30,5,5,5\n"
                           "2,5,5,5\n";
 
-        CSVTable table("../tests/hard2.csv");
+        CSVTable table("../tests/example3.csv");
         table.evaluateTable();
 
         ostringstream oss;
@@ -228,8 +226,26 @@ void TestHardTable() {
     }
 
     {
+        string expected = ",A,B,Cell\n"
+                          "1,1,0,-1\n"
+                          "2,2,6,2\n"
+                          "30,0,1,5\n"
+                          "5,2,1,5\n";
+
+        CSVTable table("../tests/example4.csv");
+        table.evaluateTable();
+
+        ostringstream oss;
+        table.printEvaluated(oss);
+
+        ASSERT_EQUAL(oss.str(), expected);
+    }
+}
+
+void TestCSVTableCells() {
+    {
         try {
-            CSVTable table("../tests/hard3.csv");
+            CSVTable table("../tests/invalid_cell1.csv");
             table.evaluateTable();
             FAIL("'Invalid cell format, reference to a non-existent cell'");
         }
@@ -240,7 +256,7 @@ void TestHardTable() {
 
     {
         try {
-            CSVTable table("../tests/hard4.csv");
+            CSVTable table("../tests/invalid_cell2.csv");
             table.evaluateTable();
             FAIL("'Invalid cell format, '=' expected in cell'");
         }
@@ -251,7 +267,7 @@ void TestHardTable() {
 
     {
         try {
-            CSVTable table("../tests/hard5.csv");
+            CSVTable table("../tests/invalid_cell3.csv");
             table.evaluateTable();
             FAIL("'Invalid cell format, can't find operation in expression'");
         }
@@ -262,7 +278,7 @@ void TestHardTable() {
 
     {
         try {
-            CSVTable table("../tests/hard6.csv");
+            CSVTable table("../tests/invalid_cell4.csv");
             table.evaluateTable();
             FAIL("'Invalid cell format, no operand found'");
         }
@@ -273,7 +289,7 @@ void TestHardTable() {
 
     {
         try {
-            CSVTable table("../tests/hard7.csv");
+            CSVTable table("../tests/invalid_cell5.csv");
             table.evaluateTable();
             FAIL("'Invalid reference to a cell'");
         }
@@ -284,7 +300,7 @@ void TestHardTable() {
 
     {
         try {
-            CSVTable table("../tests/hard8.csv");
+            CSVTable table("../tests/invalid_cell6.csv");
             table.evaluateTable();
             FAIL("'Invalid reference to a cell'");
         }
@@ -295,7 +311,7 @@ void TestHardTable() {
 
     {
         try {
-            CSVTable table("../tests/hard9.csv");
+            CSVTable table("../tests/invalid_cell7.csv");
             table.evaluateTable();
             FAIL("'Division by 0'");
         }
@@ -305,24 +321,8 @@ void TestHardTable() {
     }
 
     {
-        string expected = ",A,B,Cell\n"
-                          "1,1,0,-1\n"
-                          "2,2,6,2\n"
-                          "30,0,1,5\n"
-                          "5,2,1,5\n";
-
-        CSVTable table("../tests/hard10.csv");
-        table.evaluateTable();
-
-        ostringstream oss;
-        table.printEvaluated(oss);
-
-        ASSERT_EQUAL(oss.str(), expected);
-    }
-
-    {
         try {
-            CSVTable table("../tests/hard11.csv");
+            CSVTable table("../tests/invalid_cell8.csv");
             table.evaluateTable();
             FAIL("'Invalid cell format, cycle dependencies'");
         }

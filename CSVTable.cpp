@@ -49,7 +49,7 @@ void CSVTable::checkHeaderCell(const string &cell) {
     if (col_to_index.count(cell)) {
         throw invalid_argument("Table has repeated cells in header");
     }
-    if (std::any_of(cell.begin(), cell.end(), ::isdigit)) {
+    if (any_of(cell.begin(), cell.end(), ::isdigit)) {
         throw invalid_argument("Incorrect table format, there can be no numbers in the column name");
     }
 }
@@ -90,7 +90,7 @@ void CSVTable::checkRowNumCell(const string &cell) {
     if (cell.empty()) {
         throw invalid_argument("Incorrect table format, has empty row number");
     }
-    if (std::any_of(cell.begin(), cell.end(), ::isalpha)) {
+    if (any_of(cell.begin(), cell.end(), ::isalpha)) {
         throw invalid_argument("Incorrect table format, there can be no letters in the row name");
     }
     if (stoi(cell) < 1) {
@@ -125,7 +125,7 @@ void CSVTable::evaluateTable() {
 
     for (size_t row = 0; row < rows_size; row++) {
         for (size_t col = 0; col < cols_size; col++) {
-            std::set<std::pair<size_t, size_t>> depended;
+            set<pair<size_t, size_t>> depended;
             if (!visited[cols_size * row + col]) {
                 evaluateCell(row, col, depended);
             }
@@ -133,7 +133,7 @@ void CSVTable::evaluateTable() {
     }
 }
 
-int CSVTable::evaluateCell(size_t row, size_t col, std::set<std::pair<size_t, size_t>> &depended) {
+int CSVTable::evaluateCell(size_t row, size_t col, set<pair<size_t, size_t>> &depended) {
     // if call already evaluated
     if (visited[cols_size * row + col]) {
         return evaluated_table[cols_size * row + col];
@@ -147,7 +147,7 @@ int CSVTable::evaluateCell(size_t row, size_t col, std::set<std::pair<size_t, si
 
     auto[l_operand, operation, r_operand] = parseExpr(table[row][col]);
 
-    auto unique_index = std::pair<size_t, size_t>{row, col};
+    auto unique_index = pair<size_t, size_t>{row, col};
     depended.insert(unique_index);
 
     int left  = evaluateOperand(l_operand, depended);
@@ -172,7 +172,7 @@ int CSVTable::evaluateOperand(string &operand, set<pair<size_t, size_t>> &depend
         result = stoi(operand);
     } else {
         auto[row, col] = parseRef(operand);
-        auto unique_index = std::pair{row, col};
+        auto unique_index = pair{row, col};
         if (depended.contains(unique_index)) {
             throw invalid_argument("Invalid cell format, cycle dependencies");
         }
@@ -205,7 +205,7 @@ CSVTable::parseExpr(const string &cell) {
 }
 
 tuple<int, int>
-CSVTable::parseRef(const std::string &ref) {
+CSVTable::parseRef(const string &ref) {
     checkRef(ref);
 
     size_t pos = ref.find_first_of("123456789");
@@ -219,7 +219,7 @@ CSVTable::parseRef(const std::string &ref) {
     return make_tuple(row_to_index[row], col_to_index[col]);
 }
 
-void CSVTable::checkRef(const std::string &ref) {
+void CSVTable::checkRef(const string &ref) {
     if (ref.empty()) {
         throw invalid_argument("Invalid cell format, no operand found");
     }

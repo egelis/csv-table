@@ -6,12 +6,12 @@ using namespace std;
 int main() {
     TestRunner tr;
     RUN_TEST(tr, TestParsePath);
+    RUN_TEST(tr, TestIsInteger);
     RUN_TEST(tr, TestCSVTableGetPath);
     RUN_TEST(tr, TestCSVTableHeader);
-    RUN_TEST(tr, TestRows);
-    RUN_TEST(tr, TestIsInteger);
-    RUN_TEST(tr, TestSimpleTable);
-    RUN_TEST(tr, TestHardTable);
+    RUN_TEST(tr, TestCSVTableRows);
+    RUN_TEST(tr, TestCSVTableExamples);
+    RUN_TEST(tr, TestCSVTableCells);
 
     return 0;
 }
