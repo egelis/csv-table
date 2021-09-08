@@ -126,9 +126,7 @@ void CSVTable::evaluateTable() {
     for (size_t row = 0; row < rows_size; row++) {
         for (size_t col = 0; col < cols_size; col++) {
             set<pair<size_t, size_t>> depended;
-            if (!visited[cols_size * row + col]) {
-                evaluateCell(row, col, depended);
-            }
+            evaluateCell(row, col, depended);
         }
     }
 }
@@ -140,9 +138,9 @@ int CSVTable::evaluateCell(size_t row, size_t col, set<pair<size_t, size_t>> &de
     }
     // if call is just a number
     if (isInteger(table[row][col])) {
-        int val = stoi(table[row][col]);
-        addToEvaluatedAndSetVisited(row, col, val);
-        return val;
+        int number = stoi(table[row][col]);
+        addToEvaluatedAndSetVisited(row, col, number);
+        return number;
     }
 
     auto[l_operand, operation, r_operand] = parseExpr(table[row][col]);
@@ -166,21 +164,6 @@ void CSVTable::addToEvaluatedAndSetVisited(size_t row, size_t col, int value) {
     visited[cols_size * row + col] = true;
 }
 
-int CSVTable::evaluateOperand(string &operand, set<pair<size_t, size_t>> &depended) {
-    int result;
-    if (isInteger(operand)){
-        result = stoi(operand);
-    } else {
-        auto[row, col] = parseRef(operand);
-        auto unique_index = pair{row, col};
-        if (depended.contains(unique_index)) {
-            throw invalid_argument("Invalid cell format, cycle dependencies");
-        }
-        result = evaluateCell(row, col, depended);
-    }
-    return result;
-}
-
 tuple<string, char, string>
 CSVTable::parseExpr(const string &cell) {
     if (cell[0] != '=') {
@@ -198,10 +181,25 @@ CSVTable::parseExpr(const string &cell) {
     }
 
     char operation = cell[operation_pos];
-    string left = cell.substr(1, operation_pos - 1);
+    string left  = cell.substr(1, operation_pos - 1);
     string right = cell.substr(operation_pos + 1);
 
     return make_tuple(left, operation, right);
+}
+
+int CSVTable::evaluateOperand(string &operand, set<pair<size_t, size_t>> &depended) {
+    int result;
+    if (isInteger(operand)) {
+        result = stoi(operand);
+    } else {
+        auto[row, col] = parseRef(operand);
+        auto unique_index = pair{row, col};
+        if (depended.contains(unique_index)) {
+            throw invalid_argument("Invalid cell format, cycle dependencies");
+        }
+        result = evaluateCell(row, col, depended);
+    }
+    return result;
 }
 
 tuple<int, int>

@@ -38,13 +38,13 @@ private:
     void addToEvaluatedAndSetVisited(size_t row, size_t col, int value);
 
     static tuple<string, char, string> parseExpr(const string &cell);
+    tuple<int, int> parseRef(const string &ref);
     vector<string> parseNextRow(const string &line, int index);
     void parseRowNum(stringstream &ss, int index);
     void parseHeader(const string &header);
 
     int evaluateCell(size_t row, size_t col, set<pair<size_t, size_t>> &depended);
     int evaluateOperand(string &operand, set<pair<size_t, size_t>> &depended);
-    tuple<int, int> parseRef(const string &ref);
 };
 
 
